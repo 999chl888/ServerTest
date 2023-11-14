@@ -1,0 +1,137 @@
+syntax = "proto3";
+option go_package = "gameserver/protocol";
+
+package protocol;
+
+enum UserState {
+    UNREADY = 0;
+    READY = 1;
+    Connecting = 2;
+    INGAME = 3;
+    WATCHING = 4;
+}
+
+enum RoomState {
+    ROOM_STATE_WAITING = 0;
+    ROOM_STATE_LOADING = 1;
+    ROOM_STATE_INGAME = 2;
+}
+
+enum GameState {
+    Game_Loading = 0;
+    Game_Playing = 1;
+}
+
+enum PlyerState {
+    LIVE = 0;
+    DEATH = 1;
+}
+
+message PlayerInfo {
+    string userid = 1;
+    int64 health = 2;
+    repeated string itemsid = 3;
+    string professionid = 4;
+    int64 positionX = 5;
+    int64 positionY = 6;
+    string action = 7;
+    PlyerState playerState = 8;
+}
+
+message User {
+    string ID = 1;
+    UserState State = 2;
+    
+}
+
+message CreateRoomRequest {
+    User User = 1;
+    string MapID = 2;
+}
+
+message CreateRoomResponse {
+    bool Ret = 1;
+    string RoomID = 2;
+}
+
+message JoinRoomRequest {
+    User User = 1;
+    string RoomID = 2;
+}
+
+message JoinRoomResponse {
+    bool Ret = 1;
+    string message = 2;
+}
+
+message GetRoomStateRequest{
+    string RoomID = 1;
+}
+
+message GetRoomStateResponse {
+    bool Ret = 1;
+    repeated User User = 2;
+    RoomState roomstate = 3;
+    string Mapid = 4;
+    int64 Capacity = 5;
+    string GameserverIP = 6;
+    int64 GameserverPort = 7;
+    string GameInstanceID = 8;
+}
+
+message StartGameRequest {
+    string RoomID = 1;
+    string UserID = 2;
+}
+
+message StartGameResponse {
+    bool Ret = 1;
+    string message = 2;
+    string GameinstanceID = 3;
+    string GameserverIP = 4;
+    int64 GameserverPort = 5;
+}
+
+message CreateGameWithInstanceRequest {
+    string RoomID = 1;
+    string GameInstanceID = 2;
+}
+
+message CreateGameWithInstanceResponse {
+    bool Ret = 1;
+    string message = 2;
+}
+
+message GetGameStateRequest {
+    string GameInstanceID = 1;
+}
+
+message GetGameStateResponse {
+    bool Ret = 1;
+    string message = 2;
+    GameState Gamestate = 3;
+    repeated PlayerInfo playerlist = 4;
+}
+
+message PostGameStateRequest {
+    PlayerInfo PlayerInfo = 1;
+    string GameInstanceID = 2;
+}
+
+message PostGameStateResponse {
+    bool Ret = 1;
+    string message = 2;
+}
+
+service MainGame {
+    rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse) {}
+    rpc JoinRoom(JoinRoomRequest) returns (JoinRoomResponse) {}
+    rpc GetRoomState(GetRoomStateRequest) returns (GetRoomStateResponse) {}
+    rpc StartGame(StartGameRequest) returns (StartGameResponse) {}
+}
+
+service SubGame {
+    rpc CreateGameWithInstance(CreateGameWithInstanceRequest) returns (CreateGameWithInstanceResponse) {}
+    rpc PostGameState(PostGameStateRequest) returns (PostGameStateResponse) {}
+    rpc GetGameState(GetGameStateRequest) returns (GetGameStateResponse) {}
+}
